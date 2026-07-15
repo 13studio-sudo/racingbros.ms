@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RACINGBROS · Maintenance Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --surface:#f4f4f4;
+    --ink:#0c0c0c;
+    --line:#0c0c0c;
+    --line-soft:#c8c8c8;
+    --muted:#6a6a6a;
+    --accent:#d7282f;
+    --field:#ffffff;
+    --field-focus:#fff7f2;
+  }
+  [data-theme="dark"]{
+    --bg:#0c0c0c;
+    --surface:#181818;
+    --ink:#e4e4e4;
+    --line:#e4e4e4;
+    --line-soft:#3a3a3a;
+    --muted:#8f8f8f;
+    --accent:#d7282f;
+    --field:#181818;
+    --field-focus:#241615;
+  }
+
+  *{box-sizing:border-box;border-radius:0 !important;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Bahnschrift","DIN Alternate","Barlow Condensed","Segoe UI",sans-serif;
+    font-stretch:condensed;
+    -webkit-font-smoothing:antialiased;
+    letter-spacing:.02em;
+    min-height:100vh;
+  }
+
+  .wrap{max-width:1400px;margin:0 auto;padding:22px 26px 80px;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;margin-bottom:26px;
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .brand svg{height:38px;width:auto;display:block;}
+  .brand .logo-dark{display:none;}
+  [data-theme="dark"] .brand .logo-light{display:none;}
+  [data-theme="dark"] .brand .logo-dark{display:block;}
+  .brand-tag{
+    font-size:12px;letter-spacing:.28em;color:var(--muted);
+    text-transform:uppercase;border-left:1px solid var(--line-soft);
+    padding-left:14px;line-height:1.3;
+  }
+  .brand-tag b{display:block;color:var(--ink);letter-spacing:.16em;font-weight:600;}
+
+  .hamburger{
+    width:31px;height:31px;background:var(--ink);border:none;cursor:pointer;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;
+    flex:0 0 auto;
+  }
+  .hamburger span{width:15px;height:2px;background:var(--bg);display:block;}
+
+  /* ---------- title + meta ---------- */
+  .titleline{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  h1{
+    font-size:34px;font-weight:700;margin:0;text-transform:uppercase;
+    letter-spacing:.03em;line-height:1;
+  }
+  h1[contenteditable]:focus{outline:2px solid var(--accent);outline-offset:3px;}
+  .accentbar{height:6px;width:64px;background:var(--accent);}
+
+  .meta{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    border:1px solid var(--line);margin-bottom:22px;
+  }
+  .meta .field{
+    padding:9px 12px;border-right:1px solid var(--line-soft);
+    display:flex;flex-direction:column;gap:3px;min-width:0;
+  }
+  .meta .field:last-child{border-right:none;}
+  .meta label{font-size:10.5px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;}
+  .meta .val{
+    font-size:16px;min-height:20px;color:var(--ink);cursor:text;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .meta .val:empty::before{content:"—";color:var(--line-soft);}
+  .meta .val:focus{outline:none;color:var(--accent);text-overflow:clip;}
+
+  /* ---------- toolbar ---------- */
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center;
+  }
+  .btn{
+    height:31px;padding:0 14px;background:transparent;color:var(--ink);
+    border:1px solid var(--line);font:inherit;font-size:13px;letter-spacing:.12em;
+    text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+    transition:background .12s,color .12s;
+  }
+  .btn:hover{background:var(--ink);color:var(--bg);}
+  .btn.accent{border-color:var(--accent);color:var(--accent);}
+  .btn.accent:hover{background:var(--accent);color:#fff;}
+  .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+  .spacer{flex:1 1 auto;}
+  .hint{font-size:11.5px;color:var(--muted);letter-spacing:.06em;}
+
+  /* ---------- table ---------- */
+  .tablescroll{overflow-x:auto;border:2px solid var(--line);}
+  table{border-collapse:collapse;width:100%;min-width:640px;}
+  th,td{
+    border:1px solid var(--line);padding:0;vertical-align:top;position:relative;
+  }
+  thead th{
+    background:var(--surface);text-align:left;text-transform:uppercase;
+    letter-spacing:.14em;font-size:14px;font-weight:600;
+    padding:11px 12px;white-space:nowrap;
+  }
+  thead th .hd{display:flex;align-items:center;gap:8px;}
+  thead th .hd-name{cursor:text;outline:none;}
+  thead th .hd-name:focus{color:var(--accent);}
+  .colx{
+    margin-left:auto;width:16px;height:16px;border:1px solid var(--line-soft);
+    background:transparent;color:var(--muted);cursor:pointer;font-size:12px;line-height:1;
+    display:none;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+  thead th:hover .colx{display:flex;}
+  .colx:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  tbody td{height:44px;}
+  tbody .cell{
+    padding:9px 12px;min-height:44px;font-size:16px;outline:none;
+    white-space:pre-wrap;word-break:break-word;cursor:cell;
+  }
+  tbody .cell:empty{cursor:cell;}
+  tbody td.editing{background:var(--field-focus);box-shadow:inset 0 0 0 2px var(--accent);}
+  tbody .cell[contenteditable="true"]{cursor:text;}
+  tbody input[type="date"]{
+    width:100%;border:none;background:transparent;color:var(--ink);
+    font:inherit;font-size:16px;padding:9px 10px;outline:none;
+  }
+  tbody input[type="date"]::-webkit-calendar-picker-indicator{
+    filter:var(--cal-filter,none);cursor:pointer;
+  }
+  [data-theme="dark"] tbody input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);}
+
+  /* row gutter */
+  .gutter{width:34px;background:var(--surface);text-align:center;}
+  thead th.gutter{padding:0;}
+  tbody td.gutter{
+    font-size:12px;color:var(--muted);cursor:default;vertical-align:middle;
+    text-align:center;user-select:none;
+  }
+  tbody td.gutter .rowx{display:none;width:100%;height:100%;border:none;background:transparent;
+    color:var(--muted);cursor:pointer;font-size:14px;line-height:44px;}
+  tbody tr:hover td.gutter .num{display:none;}
+  tbody tr:hover td.gutter .rowx{display:block;}
+  .rowx:hover{color:var(--accent);}
+
+  /* ---------- footer note ---------- */
+  .foot{margin-top:20px;font-size:12px;color:var(--muted);letter-spacing:.06em;display:flex;
+    justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .foot a{color:var(--accent);text-decoration:none;}
+  .foot a:hover{text-decoration:underline;}
+
+  /* ---------- slide menu ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;
+    transition:opacity .2s;z-index:40;}
+  .scrim.open{opacity:1;pointer-events:auto;}
+  .menu{
+    position:fixed;top:0;right:0;height:100%;width:276px;background:var(--surface);
+    border-left:2px solid var(--line);transform:translateX(100%);transition:transform .22s ease;
+    z-index:50;display:flex;flex-direction:column;
+  }
+  .menu.open{transform:translateX(0);}
+  .menu-head{display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px;border-bottom:1px solid var(--line);}
+  .menu-head span{font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);}
+  .menu-close{background:none;border:none;color:var(--ink);font-size:22px;cursor:pointer;line-height:1;}
+  .menu-body{padding:8px 0;overflow:auto;}
+  .menu-sec{font-size:10.5px;letter-spacing:.24em;color:var(--muted);text-transform:uppercase;
+    padding:14px 18px 6px;}
+  .menu-item{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    width:100%;background:none;border:none;color:var(--ink);font:inherit;font-size:15px;
+    letter-spacing:.06em;text-transform:uppercase;padding:11px 18px;cursor:pointer;text-align:left;
+    text-decoration:none;}
+  .menu-item:hover{background:var(--ink);color:var(--bg);}
+  .menu-item .arrow{color:var(--accent);}
+  .menu-item:hover .arrow{color:inherit;}
+  .toggle{width:42px;height:22px;border:1px solid var(--line);position:relative;flex:0 0 auto;}
+  .toggle .knob{position:absolute;top:2px;left:2px;width:16px;height:16px;background:var(--ink);
+    transition:transform .16s;}
+  [data-theme="dark"] .toggle .knob{transform:translateX(20px);background:var(--accent);}
+
+  /* ---------- modal ---------- */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:60;display:none;
+    align-items:flex-start;justify-content:center;padding:40px 18px;overflow:auto;}
+  .modal.open{display:flex;}
+  .modal-box{background:var(--bg);border:2px solid var(--line);max-width:720px;width:100%;}
+  .modal-top{display:flex;align-items:center;justify-content:space-between;
+    padding:16px 20px;border-bottom:2px solid var(--line);position:sticky;top:0;background:var(--bg);}
+  .modal-top h2{margin:0;font-size:20px;text-transform:uppercase;letter-spacing:.06em;}
+  .modal-top .accent-dot{width:12px;height:12px;background:var(--accent);}
+  .modal-close{background:none;border:none;color:var(--ink);font-size:24px;cursor:pointer;line-height:1;}
+  .modal-content{padding:22px 24px 30px;font-size:15px;line-height:1.55;}
+  .modal-content h3{font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+    margin:22px 0 8px;}
+  .modal-content h3:first-child{margin-top:0;}
+  .modal-content p{margin:0 0 12px;}
+  .modal-content ul,.modal-content ol{margin:0 0 12px;padding-left:20px;}
+  .modal-content li{margin-bottom:6px;}
+  .modal-content .note{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line-soft);
+    padding-top:12px;margin-top:18px;}
+
+  /* ---------- add-column popover ---------- */
+  .pop{position:fixed;z-index:70;background:var(--bg);border:2px solid var(--line);
+    width:230px;display:none;}
+  .pop.open{display:block;}
+  .pop-head{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+    padding:12px 14px 6px;}
+  .pop-list{max-height:280px;overflow:auto;}
+  .pop-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--ink);
+    font:inherit;font-size:14px;padding:9px 14px;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;}
+  .pop-item:hover{background:var(--accent);color:#fff;}
+  .pop-custom{border-top:1px solid var(--line);padding:12px 14px;}
+  .pop-custom input{width:100%;height:30px;background:var(--field);border:1px solid var(--line);
+    color:var(--ink);font:inherit;font-size:14px;padding:0 8px;outline:none;}
+  .pop-custom input:focus{border-color:var(--accent);}
+  .pop-custom button{width:100%;margin-top:8px;height:30px;background:var(--ink);color:var(--bg);
+    border:none;font:inherit;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;}
+
+  @media (max-width:720px){
+    .wrap{padding:16px 14px 70px;}
+    h1{font-size:26px;}
+    .meta{grid-template-columns:repeat(2,1fr);}
+    .meta .field:nth-child(2){border-right:none;}
+    .meta .field:nth-child(1),.meta .field:nth-child(2){border-bottom:1px solid var(--line-soft);}
+    .brand-tag{display:none;}
+  }
+
+  /* ---------- print ---------- */
+  @media print{
+    :root{--bg:#fff;--ink:#000;--line:#000;--surface:#fff;--line-soft:#000;--muted:#000;}
+    .no-print{display:none !important;}
+    .wrap{max-width:none;padding:0;}
+    body{letter-spacing:0;}
+    .tablescroll{overflow:visible;border-width:2px;}
+    thead th{background:#fff;}
+    .gutter{display:none;}
+    .meta{page-break-inside:avoid;}
+    tr,td,th{page-break-inside:avoid;}
+    .foot{margin-top:14px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <!-- LOGO_A (light) -->
+      <svg class="logo-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420.86 70.68" aria-label="RACINGBROS">
+        <g fill="var(--ink)">
+          <path d="M128.34,24.64c.73,0,1.09.32,1.09.97,0,.3-.1.62-.29.97l-2.26,3.88c-.3.54-.74,1-1.35,1.37-.6.37-1.16.56-1.68.56h-9.69c-.75,0-1.13-.32-1.13-.97,0-.3.09-.62.28-.96l1.13-1.94c.19-.35.28-.67.28-.96,0-.65-.36-.97-1.09-.97-.54,0-1.11.19-1.7.57-.59.37-1.05.83-1.37,1.36l-8.99,15.48c-.3.55-.74,1.02-1.35,1.39-.6.38-1.16.58-1.67.58h-9.68c-.75,0-1.13-.32-1.13-.97,0-.29.09-.61.29-.97l10.09-17.44c.3-.53.75-.99,1.36-1.37.6-.38,1.17-.57,1.72-.57h27.13Z"/>
+          <path d="M162.53,24.64c.73,0,1.09.32,1.09.97,0,.3-.1.62-.29.97l-10.09,17.44c-.3.54-.75,1-1.35,1.37-.6.37-1.16.57-1.67.57h-27.14c-.75,0-1.13-.32-1.13-.97,0-.29.09-.61.29-.97l4.48-7.76c.32-.53.78-.99,1.37-1.36.6-.38,1.16-.57,1.7-.57h13.57c.54,0,1.11-.19,1.7-.56.59-.38,1.06-.83,1.38-1.37l2.23-3.86c.17-.35.26-.68.26-.98,0-.65-.36-.98-1.09-.98-.53,0-1.09.19-1.68.57-.59.38-1.05.85-1.36,1.38l-1.13,1.94c-.3.53-.75.99-1.35,1.36-.61.38-1.17.56-1.68.56h-9.72c-.76,0-1.13-.32-1.13-.97,0-.3.1-.62.29-.96l2.26-3.88c.3-.53.75-.99,1.35-1.37.6-.38,1.17-.57,1.72-.57h27.13ZM143.05,38.2c.19-.35.29-.67.29-.97,0-.64-.37-.97-1.13-.97-.54,0-1.1.2-1.69.57-.59.37-1.03.83-1.33,1.37l-2.27,3.88c-.19.36-.28.68-.28.97,0,.65.36.97,1.09.97.54,0,1.11-.19,1.72-.56.61-.38,1.06-.83,1.35-1.38l2.25-3.88Z"/>
+          <path d="M182.34,32.39c-.75,0-1.13-.32-1.13-.97,0-.3.1-.62.29-.96l1.13-1.94c.19-.35.28-.67.28-.96,0-.65-.37-.97-1.09-.97-.53,0-1.1.19-1.69.57-.59.37-1.05.83-1.37,1.37l-7.83,13.56c-.19.35-.29.67-.29.96,0,.65.36.97,1.09.97.54,0,1.12-.19,1.72-.56.6-.38,1.05-.83,1.36-1.38l3.35-5.81c.33-.54.78-1,1.37-1.37.59-.38,1.16-.57,1.69-.57h9.69c.76,0,1.13.32,1.13.97,0,.3-.11.63-.32.96l-4.48,7.76c-.29.54-.74,1-1.35,1.37-.61.37-1.16.57-1.68.57h-27.13c-.76,0-1.13-.32-1.13-.97,0-.29.1-.61.28-.97l10.1-17.44c.29-.53.74-.99,1.35-1.37.6-.38,1.17-.57,1.72-.57h27.13c.72,0,1.09.32,1.09.97,0,.3-.1.62-.29.97l-2.27,3.88c-.29.54-.74,1-1.35,1.37-.61.37-1.16.56-1.68.56h-9.69Z"/>
+          <path d="M191.25,45.96c-.76,0-1.13-.32-1.13-.97,0-.29.1-.61.28-.97l10.1-17.44c.29-.53.75-.99,1.35-1.37.6-.38,1.18-.57,1.72-.57h9.69c.72,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-10.09,17.44c-.29.54-.75,1-1.35,1.37-.61.37-1.17.57-1.68.57h-9.69Z"/>
+          <path d="M247.43,24.64c.73,0,1.1.32,1.1.97,0,.3-.09.62-.28.97l-10.1,17.44c-.29.54-.75,1-1.35,1.37-.61.37-1.17.57-1.68.57h-9.69c-.75,0-1.13-.32-1.13-.97,0-.29.09-.61.28-.97l8.96-15.5c.19-.35.28-.67.28-.96,0-.65-.36-.97-1.08-.97-.54,0-1.11.19-1.7.57-.59.37-1.05.83-1.37,1.37l-8.97,15.49c-.29.54-.74,1-1.35,1.37-.61.37-1.16.57-1.68.57h-9.69c-.76,0-1.13-.32-1.13-.97,0-.29.09-.61.28-.97l10.09-17.44c.29-.53.74-.99,1.35-1.37.61-.38,1.18-.57,1.72-.57h27.13Z"/>
+          <path d="M256.27,50.6c-.16-.29-.25-.67-.25-1.13,0-.67.16-1.28.49-1.82.13-.27.2-.52.2-.76,0-.62-.39-.93-1.17-.93h-13.56c-.75,0-1.14-.32-1.14-.97,0-.29.1-.61.28-.97l10.1-17.44c.29-.53.75-.99,1.35-1.37.6-.38,1.18-.57,1.72-.57h27.12c.73,0,1.1.32,1.1.97,0,.3-.1.62-.29.97l-2.27,3.88c-.29.54-.75,1-1.35,1.37-.62.38-1.16.56-1.67.56h-9.69c-.75,0-1.13-.32-1.13-.97,0-.3.09-.62.29-.96l1.12-1.94c.2-.34.29-.67.29-.96,0-.65-.35-.97-1.09-.97-.53,0-1.1.19-1.69.57-.59.37-1.05.83-1.37,1.36l-7.83,13.57c-.19.36-.28.68-.28.97,0,.65.36.97,1.09.97.54,0,1.11-.19,1.72-.56.6-.38,1.05-.84,1.35-1.38l3.35-5.82c.33-.53.78-.99,1.38-1.36.59-.38,1.16-.57,1.69-.57h9.69c.75,0,1.14.32,1.14.97,0,.3-.11.63-.33.96l-13.11,22.77c-.4.7-.83,1.05-1.3,1.05-.23,0-.43-.14-.56-.4l-5.37-9.09Z"/>
+          <path d="M316,24.64c.73,0,1.1.32,1.1.97,0,.3-.09.62-.28.97l-10.1,17.44c-.29.54-.75,1-1.35,1.37-.6.37-1.16.57-1.68.57h-27.13c-.76,0-1.13-.32-1.13-.97,0-.29.1-.61.29-.97l18.76-32.46c.41-.7.82-1.05,1.26-1.05.25,0,.44.12.6.36l5.37,9.12c.16.27.24.64.24,1.1,0,.67-.16,1.29-.49,1.86-.17.27-.24.52-.24.77,0,.62.4.92,1.21.92h13.56ZM302.12,28.51c.19-.34.29-.67.29-.96,0-.65-.37-.97-1.1-.97-.52,0-1.1.19-1.69.57-.59.37-1.05.83-1.37,1.37l-7.83,13.56c-.19.35-.29.67-.29.96,0,.65.37.97,1.09.97.54,0,1.12-.19,1.72-.56.61-.38,1.06-.83,1.35-1.38l7.83-13.57Z"/>
+          <path d="M351.01,24.64c.73,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-2.26,3.88c-.3.54-.74,1-1.35,1.37-.61.37-1.17.56-1.69.56h-9.68c-.76,0-1.14-.32-1.14-.97,0-.3.1-.62.29-.96l1.13-1.94c.19-.35.28-.67.28-.96,0-.65-.36-.97-1.09-.97-.54,0-1.1.19-1.7.57-.6.37-1.05.83-1.37,1.36l-8.99,15.48c-.3.55-.74,1.02-1.36,1.39-.6.38-1.16.58-1.67.58h-9.67c-.75,0-1.12-.32-1.12-.97,0-.29.09-.61.28-.97l10.1-17.44c.29-.53.74-.99,1.35-1.37.61-.38,1.18-.57,1.72-.57h27.13Z"/>
+          <path d="M384.79,24.64c.72,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-10.09,17.44c-.3.54-.76,1-1.35,1.37-.61.37-1.17.57-1.68.57h-27.13c-.76,0-1.13-.32-1.13-.97,0-.29.09-.61.28-.97l10.09-17.44c.3-.53.75-.99,1.35-1.37.61-.38,1.18-.57,1.72-.57h27.14ZM370.9,28.51c.19-.34.28-.67.28-.96,0-.65-.37-.97-1.09-.97-.54,0-1.1.19-1.69.57-.6.37-1.05.83-1.38,1.37l-7.83,13.56c-.18.35-.29.67-.29.96,0,.65.37.97,1.09.97.54,0,1.11-.19,1.72-.56.61-.38,1.06-.83,1.35-1.38l7.83-13.57Z"/>
+          <path d="M405.61,32.39c-.75,0-1.13-.32-1.13-.97,0-.3.08-.62.29-.96l1.12-1.94c.19-.35.28-.67.28-.96,0-.65-.37-.97-1.09-.97-.54,0-1.11.19-1.7.57-.59.37-1.05.83-1.37,1.36l-2.25,3.86c-.19.36-.29.69-.29.98,0,.65.38.97,1.13.97h13.57c.75,0,1.14.32,1.14.97,0,.3-.12.63-.33.96l-4.48,7.76c-.29.54-.74,1-1.35,1.37-.6.37-1.17.57-1.68.57h-27.13c-.75,0-1.14-.32-1.14-.97,0-.29.1-.61.29-.97l2.26-3.87c.3-.54.75-.99,1.35-1.38.61-.37,1.18-.57,1.72-.57h9.69c.73,0,1.09.33,1.09.97,0,.3-.09.62-.29.97l-1.13,1.94c-.18.36-.28.67-.28.97,0,.65.37.97,1.1.97.54,0,1.1-.19,1.7-.56.62-.38,1.07-.83,1.36-1.38l2.27-3.87c.18-.35.27-.68.27-.97,0-.65-.37-.98-1.13-.98h-13.56c-.73,0-1.1-.31-1.1-.96,0-.29.1-.61.29-.97l4.48-7.75c.29-.53.75-.99,1.35-1.37.61-.38,1.17-.57,1.72-.57h27.13c.72,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-2.26,3.88c-.3.54-.75,1-1.36,1.37-.61.37-1.17.56-1.67.56h-9.7Z"/>
+        </g>
+        <g>
+          <rect fill="#d7282f" width="70.68" height="70.68" rx="6.45" ry="6.45"/>
+          <path fill="#fff" d="M65.57,33.24h-17.8c-.26,0-.47-.03-.66-.08-.58-.16-.87-.54-.87-1.14,0-.31.09-.66.27-1,.42-.75.64-1.55.64-2.44,0-.6-.1-1.08-.31-1.43l-4.89-8.33h9.1c.69,0,1.45-.25,2.25-.75.8-.48,1.39-1.08,1.78-1.79l2.92-5.11c.28-.44.43-.86.43-1.27,0-.83-.48-1.26-1.48-1.26H21.36c-.71,0-1.46.25-2.23.75-.78.48-1.37,1.09-1.81,1.78l-13.24,22.9c-.26.46-.38.89-.38,1.27,0,.85.47,1.28,1.43,1.28h12.7c.71,0,1.46-.25,2.26-.74.8-.5,1.39-1.09,1.77-1.81l11.82-20.33c.39-.7.98-1.3,1.77-1.8.79-.49,1.52-.74,2.18-.74,1,0,1.5.42,1.5,1.27,0,.39-.12.81-.39,1.27l-1.26,2.16c-.03.06-.08.13-.12.2L12.71,58.66c-.25.46-.38.88-.38,1.27,0,.85.47,1.27,1.42,1.27h35.59c.71,0,1.46-.24,2.28-.73.78-.49,1.37-1.1,1.75-1.81l13.25-22.87c.29-.46.43-.9.43-1.27,0-.86-.47-1.28-1.48-1.28ZM47.41,38.33l-10.32,17.79c-.44.7-1.02,1.32-1.81,1.8-.76.49-1.53.74-2.21.74-1,0-1.51-.43-1.51-1.26,0-.39.17-.82.46-1.27l10.32-17.79c.39-.72.99-1.32,1.78-1.82.78-.48,1.52-.73,2.19-.73.98,0,1.48.42,1.48,1.27,0,.38-.12.81-.37,1.27Z"/>
+        </g>
+      </svg>
+      <!-- LOGO_B (dark) -->
+      <svg class="logo-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420.86 70.68" aria-label="RACINGBROS">
+        <g fill="#ffffff">
+          <path d="M128.34,24.64c.73,0,1.09.32,1.09.97,0,.3-.1.62-.29.97l-2.26,3.88c-.3.54-.74,1-1.35,1.37-.6.37-1.16.56-1.68.56h-9.69c-.75,0-1.13-.32-1.13-.97,0-.3.09-.62.28-.96l1.13-1.94c.19-.35.28-.67.28-.96,0-.65-.36-.97-1.09-.97-.54,0-1.11.19-1.7.57-.59.37-1.05.83-1.37,1.36l-8.99,15.48c-.3.55-.74,1.02-1.35,1.39-.6.38-1.16.58-1.67.58h-9.68c-.75,0-1.13-.32-1.13-.97,0-.29.09-.61.29-.97l10.09-17.44c.3-.53.75-.99,1.36-1.37.6-.38,1.17-.57,1.72-.57h27.13Z"/>
+          <path d="M162.53,24.64c.73,0,1.09.32,1.09.97,0,.3-.1.62-.29.97l-10.09,17.44c-.3.54-.75,1-1.35,1.37-.6.37-1.16.57-1.67.57h-27.14c-.75,0-1.13-.32-1.13-.97,0-.29.09-.61.29-.97l4.48-7.76c.32-.53.78-.99,1.37-1.36.6-.38,1.16-.57,1.7-.57h13.57c.54,0,1.11-.19,1.7-.56.59-.38,1.06-.83,1.38-1.37l2.23-3.86c.17-.35.26-.68.26-.98,0-.65-.36-.98-1.09-.98-.53,0-1.09.19-1.68.57-.59.38-1.05.85-1.36,1.38l-1.13,1.94c-.3.53-.75.99-1.35,1.36-.61.38-1.17.56-1.68.56h-9.72c-.76,0-1.13-.32-1.13-.97,0-.3.1-.62.29-.96l2.26-3.88c.3-.53.75-.99,1.35-1.37.6-.38,1.17-.57,1.72-.57h27.13ZM143.05,38.2c.19-.35.29-.67.29-.97,0-.64-.37-.97-1.13-.97-.54,0-1.1.2-1.69.57-.59.37-1.03.83-1.33,1.37l-2.27,3.88c-.19.36-.28.68-.28.97,0,.65.36.97,1.09.97.54,0,1.11-.19,1.72-.56.61-.38,1.06-.83,1.35-1.38l2.25-3.88Z"/>
+          <path d="M182.34,32.39c-.75,0-1.13-.32-1.13-.97,0-.3.1-.62.29-.96l1.13-1.94c.19-.35.28-.67.28-.96,0-.65-.37-.97-1.09-.97-.53,0-1.1.19-1.69.57-.59.37-1.05.83-1.37,1.37l-7.83,13.56c-.19.35-.29.67-.29.96,0,.65.36.97,1.09.97.54,0,1.12-.19,1.72-.56.6-.38,1.05-.83,1.36-1.38l3.35-5.81c.33-.54.78-1,1.37-1.37.59-.38,1.16-.57,1.69-.57h9.69c.76,0,1.13.32,1.13.97,0,.3-.11.63-.32.96l-4.48,7.76c-.29.54-.74,1-1.35,1.37-.61.37-1.16.57-1.68.57h-27.13c-.76,0-1.13-.32-1.13-.97,0-.29.1-.61.28-.97l10.1-17.44c.29-.53.74-.99,1.35-1.37.6-.38,1.17-.57,1.72-.57h27.13c.72,0,1.09.32,1.09.97,0,.3-.1.62-.29.97l-2.27,3.88c-.29.54-.74,1-1.35,1.37-.61.37-1.16.56-1.68.56h-9.69Z"/>
+          <path d="M191.25,45.96c-.76,0-1.13-.32-1.13-.97,0-.29.1-.61.28-.97l10.1-17.44c.29-.53.75-.99,1.35-1.37.6-.38,1.18-.57,1.72-.57h9.69c.72,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-10.09,17.44c-.29.54-.75,1-1.35,1.37-.61.37-1.17.57-1.68.57h-9.69Z"/>
+          <path d="M247.43,24.64c.73,0,1.1.32,1.1.97,0,.3-.09.62-.28.97l-10.1,17.44c-.29.54-.75,1-1.35,1.37-.61.37-1.17.57-1.68.57h-9.69c-.75,0-1.13-.32-1.13-.97,0-.29.09-.61.28-.97l8.96-15.5c.19-.35.28-.67.28-.96,0-.65-.36-.97-1.08-.97-.54,0-1.11.19-1.7.57-.59.37-1.05.83-1.37,1.37l-8.97,15.49c-.29.54-.74,1-1.35,1.37-.61.37-1.16.57-1.68.57h-9.69c-.76,0-1.13-.32-1.13-.97,0-.29.09-.61.28-.97l10.09-17.44c.29-.53.74-.99,1.35-1.37.61-.38,1.18-.57,1.72-.57h27.13Z"/>
+          <path d="M256.27,50.6c-.16-.29-.25-.67-.25-1.13,0-.67.16-1.28.49-1.82.13-.27.2-.52.2-.76,0-.62-.39-.93-1.17-.93h-13.56c-.75,0-1.14-.32-1.14-.97,0-.29.1-.61.28-.97l10.1-17.44c.29-.53.75-.99,1.35-1.37.6-.38,1.18-.57,1.72-.57h27.12c.73,0,1.1.32,1.1.97,0,.3-.1.62-.29.97l-2.27,3.88c-.29.54-.75,1-1.35,1.37-.62.38-1.16.56-1.67.56h-9.69c-.75,0-1.13-.32-1.13-.97,0-.3.09-.62.29-.96l1.12-1.94c.2-.34.29-.67.29-.96,0-.65-.35-.97-1.09-.97-.53,0-1.1.19-1.69.57-.59.37-1.05.83-1.37,1.36l-7.83,13.57c-.19.36-.28.68-.28.97,0,.65.36.97,1.09.97.54,0,1.11-.19,1.72-.56.6-.38,1.05-.84,1.35-1.38l3.35-5.82c.33-.53.78-.99,1.38-1.36.59-.38,1.16-.57,1.69-.57h9.69c.75,0,1.14.32,1.14.97,0,.3-.11.63-.33.96l-13.11,22.77c-.4.7-.83,1.05-1.3,1.05-.23,0-.43-.14-.56-.4l-5.37-9.09Z"/>
+          <path d="M316,24.64c.73,0,1.1.32,1.1.97,0,.3-.09.62-.28.97l-10.1,17.44c-.29.54-.75,1-1.35,1.37-.6.37-1.16.57-1.68.57h-27.13c-.76,0-1.13-.32-1.13-.97,0-.29.1-.61.29-.97l18.76-32.46c.41-.7.82-1.05,1.26-1.05.25,0,.44.12.6.36l5.37,9.12c.16.27.24.64.24,1.1,0,.67-.16,1.29-.49,1.86-.17.27-.24.52-.24.77,0,.62.4.92,1.21.92h13.56ZM302.12,28.51c.19-.34.29-.67.29-.96,0-.65-.37-.97-1.1-.97-.52,0-1.1.19-1.69.57-.59.37-1.05.83-1.37,1.37l-7.83,13.56c-.19.35-.29.67-.29.96,0,.65.37.97,1.09.97.54,0,1.12-.19,1.72-.56.61-.38,1.06-.83,1.35-1.38l7.83-13.57Z"/>
+          <path d="M351.01,24.64c.73,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-2.26,3.88c-.3.54-.74,1-1.35,1.37-.61.37-1.17.56-1.69.56h-9.68c-.76,0-1.14-.32-1.14-.97,0-.3.1-.62.29-.96l1.13-1.94c.19-.35.28-.67.28-.96,0-.65-.36-.97-1.09-.97-.54,0-1.1.19-1.7.57-.6.37-1.05.83-1.37,1.36l-8.99,15.48c-.3.55-.74,1.02-1.36,1.39-.6.38-1.16.58-1.67.58h-9.67c-.75,0-1.12-.32-1.12-.97,0-.29.09-.61.28-.97l10.1-17.44c.29-.53.74-.99,1.35-1.37.61-.38,1.18-.57,1.72-.57h27.13Z"/>
+          <path d="M384.79,24.64c.72,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-10.09,17.44c-.3.54-.76,1-1.35,1.37-.61.37-1.17.57-1.68.57h-27.13c-.76,0-1.13-.32-1.13-.97,0-.29.09-.61.28-.97l10.09-17.44c.3-.53.75-.99,1.35-1.37.61-.38,1.18-.57,1.72-.57h27.14ZM370.9,28.51c.19-.34.28-.67.28-.96,0-.65-.37-.97-1.09-.97-.54,0-1.1.19-1.69.57-.6.37-1.05.83-1.38,1.37l-7.83,13.56c-.18.35-.29.67-.29.96,0,.65.37.97,1.09.97.54,0,1.11-.19,1.72-.56.61-.38,1.06-.83,1.35-1.38l7.83-13.57Z"/>
+          <path d="M405.61,32.39c-.75,0-1.13-.32-1.13-.97,0-.3.08-.62.29-.96l1.12-1.94c.19-.35.28-.67.28-.96,0-.65-.37-.97-1.09-.97-.54,0-1.11.19-1.7.57-.59.37-1.05.83-1.37,1.36l-2.25,3.86c-.19.36-.29.69-.29.98,0,.65.38.97,1.13.97h13.57c.75,0,1.14.32,1.14.97,0,.3-.12.63-.33.96l-4.48,7.76c-.29.54-.74,1-1.35,1.37-.6.37-1.17.57-1.68.57h-27.13c-.75,0-1.14-.32-1.14-.97,0-.29.1-.61.29-.97l2.26-3.87c.3-.54.75-.99,1.35-1.38.61-.37,1.18-.57,1.72-.57h9.69c.73,0,1.09.33,1.09.97,0,.3-.09.62-.29.97l-1.13,1.94c-.18.36-.28.67-.28.97,0,.65.37.97,1.1.97.54,0,1.1-.19,1.7-.56.62-.38,1.07-.83,1.36-1.38l2.27-3.87c.18-.35.27-.68.27-.97,0-.65-.37-.98-1.13-.98h-13.56c-.73,0-1.1-.31-1.1-.96,0-.29.1-.61.29-.97l4.48-7.75c.29-.53.75-.99,1.35-1.37.61-.38,1.17-.57,1.72-.57h27.13c.72,0,1.08.32,1.08.97,0,.3-.1.62-.28.97l-2.26,3.88c-.3.54-.75,1-1.36,1.37-.61.37-1.17.56-1.67.56h-9.7Z"/>
+        </g>
+        <g>
+          <rect fill="#d7282f" width="70.68" height="70.68" rx="6.45" ry="6.45"/>
+          <path fill="#fff" d="M65.57,33.24h-17.8c-.26,0-.47-.03-.66-.08-.58-.16-.87-.54-.87-1.14,0-.31.09-.66.27-1,.42-.75.64-1.55.64-2.44,0-.6-.1-1.08-.31-1.43l-4.89-8.33h9.1c.69,0,1.45-.25,2.25-.75.8-.48,1.39-1.08,1.78-1.79l2.92-5.11c.28-.44.43-.86.43-1.27,0-.83-.48-1.26-1.48-1.26H21.36c-.71,0-1.46.25-2.23.75-.78.48-1.37,1.09-1.81,1.78l-13.24,22.9c-.26.46-.38.89-.38,1.27,0,.85.47,1.28,1.43,1.28h12.7c.71,0,1.46-.25,2.26-.74.8-.5,1.39-1.09,1.77-1.81l11.82-20.33c.39-.7.98-1.3,1.77-1.8.79-.49,1.52-.74,2.18-.74,1,0,1.5.42,1.5,1.27,0,.39-.12.81-.39,1.27l-1.26,2.16c-.03.06-.08.13-.12.2L12.71,58.66c-.25.46-.38.88-.38,1.27,0,.85.47,1.27,1.42,1.27h35.59c.71,0,1.46-.24,2.28-.73.78-.49,1.37-1.1,1.75-1.81l13.25-22.87c.29-.46.43-.9.43-1.27,0-.86-.47-1.28-1.48-1.28ZM47.41,38.33l-10.32,17.79c-.44.7-1.02,1.32-1.81,1.8-.76.49-1.53.74-2.21.74-1,0-1.51-.43-1.51-1.26,0-.39.17-.82.46-1.27l10.32-17.79c.39-.72.99-1.32,1.78-1.82.78-.48,1.52-.73,2.19-.73.98,0,1.48.42,1.48,1.27,0,.38-.12.81-.37,1.27Z"/>
+        </g>
+      </svg>
+      <div class="brand-tag no-print">Suspension<b>Service Record</b></div>
+    </div>
+    <button class="hamburger no-print" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+
+  <!-- TITLE -->
+  <div class="titleline">
+    <h1 id="docTitle" contenteditable="true" spellcheck="false">MAINTENANCE LOG</h1>
+  </div>
+
+  <!-- META -->
+  <div class="meta" id="meta">
+    <div class="field"><label>Product / Model</label><div class="val" data-key="model" contenteditable="true" spellcheck="false"></div></div>
+    <div class="field"><label>Serial No.</label><div class="val" data-key="serial" contenteditable="true" spellcheck="false"></div></div>
+    <div class="field"><label>Install Date</label><div class="val" data-key="install" contenteditable="true" spellcheck="false"></div></div>
+    <div class="field"><label>Owner / Dealer</label><div class="val" data-key="owner" contenteditable="true" spellcheck="false"></div></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar no-print">
+    <button class="btn" id="addRow"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Row</button>
+    <button class="btn" id="addCol"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Column</button>
+    <span class="spacer"></span>
+    <button class="btn" id="importBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>Import</button>
+    <button class="btn" id="exportBtn"><svg viewBox="0 0 24 24"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 3h16"/></svg>Export</button>
+    <button class="btn accent" id="printBtn"><svg viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"/></svg>Print</button>
+  </div>
+  <div class="toolbar no-print"><span class="hint">Double-click any cell to edit · double-click a Date cell to open the picker · hover a row / header to remove it</span></div>
+
+  <!-- TABLE -->
+  <div class="tablescroll">
+    <table id="log">
+      <thead><tr id="headRow"></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+
+  <div class="foot no-print">
+    <span>RACINGBROS suspension service record</span>
+    <span>Read the <a href="#" id="footWarranty">Warranty Policy</a> · <a href="https://www.racingbros.com" target="_blank" rel="noopener">racingbros.com</a></span>
+  </div>
+</div>
+
+<!-- SLIDE MENU -->
+<div class="scrim no-print" id="scrim"></div>
+<aside class="menu no-print" id="menu" aria-hidden="true">
+  <div class="menu-head"><span>Menu</span><button class="menu-close" id="menuClose">×</button></div>
+  <div class="menu-body">
+    <div class="menu-sec">Appearance</div>
+    <button class="menu-item" id="themeToggle">Dark Mode<span class="toggle"><span class="knob"></span></span></button>
+    <div class="menu-sec">Information</div>
+    <button class="menu-item" id="openWarranty">Warranty Policy<span class="arrow">›</span></button>
+    <button class="menu-item" id="openAbout">About This Tool<span class="arrow">›</span></button>
+    <div class="menu-sec">RACINGBROS</div>
+    <a class="menu-item" href="https://www.racingbros.com" target="_blank" rel="noopener">Official Website<span class="arrow">↗</span></a>
+    <a class="menu-item" href="https://www.racingbros.com/distributors" target="_blank" rel="noopener">Find a Dealer<span class="arrow">↗</span></a>
+    <a class="menu-item" href="https://www.racingbros.com/contact-us" target="_blank" rel="noopener">Contact / Service<span class="arrow">↗</span></a>
+  </div>
+</aside>
+
+<!-- ADD COLUMN POPOVER -->
+<div class="pop no-print" id="colPop">
+  <div class="pop-head">Add Column</div>
+  <div class="pop-list" id="colPresets"></div>
+  <div class="pop-custom">
+    <input id="colCustom" type="text" placeholder="Custom name…" maxlength="40">
+    <button id="colCustomAdd">Add</button>
+  </div>
+</div>
+
+<!-- WARRANTY MODAL -->
+<div class="modal no-print" id="warrantyModal">
+  <div class="modal-box">
+    <div class="modal-top"><div style="display:flex;align-items:center;gap:12px;"><span class="accent-dot"></span><h2>Warranty Policy</h2></div><button class="modal-close" data-close>×</button></div>
+    <div class="modal-content">
+      <h3>Limited Warranty Scope</h3>
+      <p>This warranty applies only to RACINGBROS suspension products installed by officially authorized RACINGBROS dealers. All dealers must complete professional installation training before performing installations or adjustments. Products bought from non-authorized dealers are not covered.</p>
+      <p>RACINGBROS carries product liability insurance coverage up to NT$10 million. To claim service, present a valid warranty card through your original purchasing dealer. The card must carry the authorized dealer's invoice or shop stamp dated at purchase, plus the installation date, to be valid.</p>
+      <p>With a valid warranty card, coverage is as follows:</p>
+      <ul>
+        <li><b>Air suspension (Bazooka / Air Cannon)</b> — one free basic service within the first year of installation; extendable one more year after service.</li>
+        <li><b>Air forks (Air Strike)</b> — one-year product warranty; servicing at customer's expense.</li>
+        <li><b>Spring suspension (Shicane / Bazooka HD)</b> — two-year product warranty; servicing at customer's expense.</li>
+        <li><b>Cartridge fork series (Scepter 25 / Marksman 33 UR Style)</b> — one-year product warranty; servicing at customer's expense.</li>
+        <li>Any RACINGBROS product serviced at the factory earns a one-year warranty extension.</li>
+      </ul>
+      <p>Regular maintenance by the end user is required to keep performance and extend product life — that's what this log is for.</p>
+
+      <h3>Warranty Limitations</h3>
+      <p>Coverage does not apply in these cases:</p>
+      <ol>
+        <li>Improper installation or adjustment not following RACINGBROS technical procedures.</li>
+        <li>Damage from collision, misuse, or use outside the specifications.</li>
+        <li>Products that have been modified or altered.</li>
+        <li>Serial numbers or product codes tampered with or removed.</li>
+        <li>Normal wear and tear, lack of maintenance, or non-recommended use conditions.</li>
+        <li>Damage caused by using non-RACINGBROS parts.</li>
+        <li>Incompatible, unauthorized, or inappropriate parts or accessories.</li>
+        <li>Damage from commercial or rental vehicle use.</li>
+        <li>Missing authorized-dealer invoice stamp on the warranty card.</li>
+      </ol>
+
+      <h3>Important Notes</h3>
+      <ol>
+        <li>The warranty card verifies product origin and records service history. Without it, no warranty or service is provided; uncarded products are returned at the customer's shipping cost.</li>
+        <li>All products ship to dealers with a warranty card; the dealer stamps it and fills the install date after installation.</li>
+        <li>Customers must confirm they receive a valid card after installation to stay eligible.</li>
+        <li>Lost cards may be reissued if the original dealer and product can be verified. After three failed verification attempts the product is flagged and excluded from future service.</li>
+        <li>For used products, confirm the original owner or dealer holds a valid card or knows the original dealer. Otherwise RACINGBROS may deny warranty and service.</li>
+        <li>RACINGBROS does not mediate secondhand transactions; disputes are between buyer and seller.</li>
+        <li>For secondhand install or adjustment issues, visit an authorized RACINGBROS dealer.</li>
+      </ol>
+
+      <h3>Card Reissue</h3>
+      <p>Provide the serial number and original dealer info for verification; if verified, a replacement can be issued via any authorized dealer. Reissue cost is NT$300 + NT$150 COD shipping (NT$450 total). No reissue for products that were not legally purchased, or that were samples, giveaways, or test items, or where the original dealer cannot be verified.</p>
+
+      <h3>Local Laws &amp; Liability</h3>
+      <p>This warranty grants specific legal rights; you may hold others depending on location. Where it conflicts with local law, it is read to align with that law. To the extent the law allows, RACINGBROS and its suppliers are not liable for direct, indirect, special, incidental, or consequential damages beyond the obligations stated here. RACINGBROS reserves the right to interpret, modify, or update this policy at any time.</p>
+
+      <p class="note">Summary of RACINGBROS' published Suspension Product Warranty Policy, provided for convenience. The full official version governs — read it at racingbros.com/post/suspension-product-warranty-policy.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT MODAL -->
+<div class="modal no-print" id="aboutModal">
+  <div class="modal-box">
+    <div class="modal-top"><div style="display:flex;align-items:center;gap:12px;"><span class="accent-dot"></span><h2>About</h2></div><button class="modal-close" data-close>×</button></div>
+    <div class="modal-content">
+      <p>A service record for your RACINGBROS suspension. Log every service — date, mileage, work done, settings, and who signed off — so your warranty history stays complete and your setup stays repeatable.</p>
+      <h3>How to use it</h3>
+      <ul>
+        <li>Double-click any cell to type. Double-click a <b>Date</b> cell to pick a date.</li>
+        <li>Add rows and columns from the toolbar. Column presets cover the settings suspension riders track most.</li>
+        <li>Hover a row number or a column header to remove it. Double-click a header to rename it.</li>
+        <li><b>Export</b> saves the whole log as a file; <b>Import</b> loads it back on any device. <b>Print</b> gives you a clean paper copy.</li>
+      </ul>
+      <p class="note">Keeping this log up to date supports warranty eligibility but does not replace your official RACINGBROS warranty card. See the Warranty Policy for what's covered.</p>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="application/json,.json" style="display:none">
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- state ----------
+  var uid = 0;
+  function id(){ return "id" + (++uid) + "_" + Math.random().toString(36).slice(2,7); }
+
+  var COLUMN_PRESETS = [
+    "Mileage / Hours","Product / Model","Service Type","Oil Change",
+    "Oil Weight (Wt/cSt)","Fork Oil Level (mm)","Air Pressure (PSI)","Spring Rate",
+    "Sag (%)","Compression (clicks)","Rebound (clicks)","Seal / Wiper",
+    "Dealer / Tech","Next Service","Signature"
+  ];
+
+  var state = {
+    title: "MAINTENANCE LOG",
+    meta: { model:"", serial:"", install:"", owner:"" },
+    columns: [
+      { id:id(), name:"Date",      type:"date" },
+      { id:id(), name:"Mileage",   type:"text" },
+      { id:id(), name:"Note",      type:"text" },
+      { id:id(), name:"Signature", type:"text" }
+    ],
+    rows: []
+  };
+  function newRow(){ return { id:id(), cells:{} }; }
+  for (var i=0;i<20;i++) state.rows.push(newRow());
+
+  // ---------- element refs ----------
+  var $ = function(s){ return document.querySelector(s); };
+  var headRow = $("#headRow"), body = $("#body");
+
+  // ---------- date formatting ----------
+  function fmtDate(iso){
+    if(!iso) return "";
+    var p = iso.split("-");
+    if(p.length!==3) return iso;
+    return p[0] + " · " + p[1] + " · " + p[2];
+  }
+
+  // ---------- render ----------
+  function render(){
+    // head
+    headRow.innerHTML = "";
+    var gh = document.createElement("th");
+    gh.className = "gutter no-print";
+    headRow.appendChild(gh);
+
+    state.columns.forEach(function(col){
+      var th = document.createElement("th");
+      var hd = document.createElement("div"); hd.className = "hd";
+      var nm = document.createElement("span");
+      nm.className = "hd-name"; nm.contentEditable = "true"; nm.spellcheck = false;
+      nm.textContent = col.name;
+      nm.addEventListener("blur", function(){
+        col.name = nm.textContent.trim() || "Column";
+        nm.textContent = col.name;
+      });
+      nm.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); nm.blur(); }});
+      hd.appendChild(nm);
+      var x = document.createElement("button");
+      x.className = "colx no-print"; x.textContent = "×"; x.title = "Remove column";
+      x.addEventListener("click", function(){
+        if(state.columns.length<=1) return;
+        var idx = state.columns.indexOf(col);
+        state.columns.splice(idx,1);
+        state.rows.forEach(function(r){ delete r.cells[col.id]; });
+        render();
+      });
+      hd.appendChild(x);
+      th.appendChild(hd);
+      headRow.appendChild(th);
+    });
+
+    // body
+    body.innerHTML = "";
+    state.rows.forEach(function(row, rIndex){
+      var tr = document.createElement("tr");
+
+      var g = document.createElement("td");
+      g.className = "gutter no-print";
+      var num = document.createElement("span"); num.className = "num"; num.textContent = rIndex+1;
+      var rx = document.createElement("button"); rx.className = "rowx"; rx.textContent = "×"; rx.title = "Remove row";
+      rx.addEventListener("click", function(){
+        var i = state.rows.indexOf(row);
+        state.rows.splice(i,1);
+        render();
+      });
+      g.appendChild(num); g.appendChild(rx);
+      tr.appendChild(g);
+
+      state.columns.forEach(function(col){
+        var td = document.createElement("td");
+        td.dataset.col = col.id;
+        var cell = document.createElement("div");
+        cell.className = "cell";
+        var v = row.cells[col.id] || "";
+        cell.textContent = (col.type==="date") ? fmtDate(v) : v;
+        td.appendChild(cell);
+
+        td.addEventListener("dblclick", function(){
+          if(td.classList.contains("editing")) return;
+          if(col.type==="date"){ editDate(td, cell, row, col); }
+          else { editText(td, cell, row, col); }
+        });
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+  }
+
+  function editText(td, cell, row, col){
+    td.classList.add("editing");
+    cell.contentEditable = "true";
+    cell.textContent = row.cells[col.id] || "";
+    cell.focus();
+    var range = document.createRange(); range.selectNodeContents(cell);
+    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    function commit(){
+      row.cells[col.id] = cell.textContent.trim();
+      cell.contentEditable = "false";
+      cell.textContent = row.cells[col.id];
+      td.classList.remove("editing");
+      cell.removeEventListener("blur", commit);
+      cell.removeEventListener("keydown", key);
+    }
+    function key(e){
+      if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); cell.blur(); }
+      if(e.key==="Escape"){ cell.textContent = row.cells[col.id] || ""; cell.blur(); }
+    }
+    cell.addEventListener("blur", commit);
+    cell.addEventListener("keydown", key);
+  }
+
+  function editDate(td, cell, row, col){
+    td.classList.add("editing");
+    var input = document.createElement("input");
+    input.type = "date";
+    input.value = row.cells[col.id] || "";
+    td.replaceChild(input, cell);
+    input.focus();
+    if(input.showPicker){ try{ input.showPicker(); }catch(e){} }
+    function commit(){
+      row.cells[col.id] = input.value;
+      cell.textContent = fmtDate(input.value);
+      td.replaceChild(cell, input);
+      td.classList.remove("editing");
+    }
+    input.addEventListener("change", commit);
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", function(e){ if(e.key==="Escape"){ input.value=row.cells[col.id]||""; commit(); }});
+  }
+
+  // ---------- toolbar ----------
+  $("#addRow").addEventListener("click", function(){
+    state.rows.push(newRow()); render();
+    var last = body.lastElementChild;
+    if(last && last.scrollIntoView) last.scrollIntoView({behavior:"smooth",block:"nearest"});
+  });
+
+  var colPop = $("#colPop"), colPresets = $("#colPresets");
+  COLUMN_PRESETS.forEach(function(name){
+    var b = document.createElement("button");
+    b.className = "pop-item"; b.textContent = name;
+    b.addEventListener("click", function(){ addColumn(name); closePop(); });
+    colPresets.appendChild(b);
+  });
+  function addColumn(name, type){
+    var t = type || (/date/i.test(name) ? "date" : "text");
+    state.columns.push({ id:id(), name:name, type:t });
+    render();
+    $(".tablescroll").scrollLeft = $(".tablescroll").scrollWidth;
+  }
+  function openPop(){
+    var r = $("#addCol").getBoundingClientRect();
+    colPop.style.top = (r.bottom + 6) + "px";
+    var left = r.left;
+    if(left + 230 > window.innerWidth - 10) left = window.innerWidth - 240;
+    colPop.style.left = left + "px";
+    colPop.classList.add("open");
+  }
+  function closePop(){ colPop.classList.remove("open"); $("#colCustom").value=""; }
+  $("#addCol").addEventListener("click", function(e){ e.stopPropagation(); colPop.classList.contains("open") ? closePop() : openPop(); });
+  $("#colCustomAdd").addEventListener("click", function(){
+    var v = $("#colCustom").value.trim(); if(!v) return; addColumn(v); closePop();
+  });
+  $("#colCustom").addEventListener("keydown", function(e){ if(e.key==="Enter"){ $("#colCustomAdd").click(); }});
+  document.addEventListener("click", function(e){
+    if(colPop.classList.contains("open") && !colPop.contains(e.target) && e.target.id!=="addCol") closePop();
+  });
+
+  // ---------- title + meta binding ----------
+  var docTitle = $("#docTitle");
+  docTitle.addEventListener("blur", function(){ state.title = docTitle.textContent.trim() || "MAINTENANCE LOG"; docTitle.textContent = state.title; });
+  docTitle.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); docTitle.blur(); }});
+  Array.prototype.forEach.call(document.querySelectorAll("#meta .val"), function(el){
+    el.textContent = state.meta[el.dataset.key] || "";
+    el.addEventListener("blur", function(){ state.meta[el.dataset.key] = el.textContent.trim(); });
+    el.addEventListener("keydown", function(e){ if(e.key==="Enter"){ e.preventDefault(); el.blur(); }});
+  });
+  function syncMetaDOM(){
+    docTitle.textContent = state.title;
+    Array.prototype.forEach.call(document.querySelectorAll("#meta .val"), function(el){
+      el.textContent = state.meta[el.dataset.key] || "";
+    });
+  }
+
+  // ---------- export / import ----------
+  $("#exportBtn").addEventListener("click", function(){
+    var data = JSON.stringify({ app:"racingbros-maintenance-log", version:1, data:state }, null, 2);
+    var blob = new Blob([data], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var stamp = new Date().toISOString().slice(0,10);
+    var base = (state.meta.model || state.title || "maintenance-log").replace(/[^a-z0-9]+/gi,"-").toLowerCase();
+    a.href = url; a.download = "racingbros-" + base + "-" + stamp + ".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  var fileInput = $("#fileInput");
+  $("#importBtn").addEventListener("click", function(){ fileInput.value=""; fileInput.click(); });
+  fileInput.addEventListener("change", function(){
+    var f = fileInput.files[0]; if(!f) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var parsed = JSON.parse(reader.result);
+        var d = parsed.data || parsed;
+        if(!d.columns || !d.rows) throw new Error("bad");
+        state.title = d.title || "MAINTENANCE LOG";
+        state.meta = { model:"", serial:"", install:"", owner:"" };
+        if(d.meta) for(var k in state.meta) if(d.meta[k]!=null) state.meta[k] = d.meta[k];
+        state.columns = d.columns.map(function(c){ return { id:c.id||id(), name:c.name||"Column", type:c.type==="date"?"date":"text" }; });
+        state.rows = d.rows.map(function(r){ return { id:r.id||id(), cells:r.cells||{} }; });
+        syncMetaDOM(); render();
+      }catch(err){
+        alert("Could not read that file. Import a log exported from this tool.");
+      }
+    };
+    reader.readAsText(f);
+  });
+
+  // ---------- print ----------
+  $("#printBtn").addEventListener("click", function(){ window.print(); });
+
+  // ---------- theme ----------
+  function setTheme(t){
+    document.documentElement.setAttribute("data-theme", t);
+    $("#themeToggle").childNodes[0].nodeValue = (t==="dark") ? "Light Mode" : "Dark Mode";
+  }
+  $("#themeToggle").addEventListener("click", function(){
+    var cur = document.documentElement.getAttribute("data-theme");
+    setTheme(cur==="dark" ? "light" : "dark");
+  });
+
+  // ---------- menu ----------
+  var menu = $("#menu"), scrim = $("#scrim");
+  function openMenu(){ menu.classList.add("open"); scrim.classList.add("open"); menu.setAttribute("aria-hidden","false"); }
+  function closeMenu(){ menu.classList.remove("open"); scrim.classList.remove("open"); menu.setAttribute("aria-hidden","true"); }
+  $("#hamburger").addEventListener("click", openMenu);
+  $("#menuClose").addEventListener("click", closeMenu);
+  scrim.addEventListener("click", closeMenu);
+
+  // ---------- modals ----------
+  function openModal(sel){ $(sel).classList.add("open"); }
+  function closeModals(){ Array.prototype.forEach.call(document.querySelectorAll(".modal"), function(m){ m.classList.remove("open"); }); }
+  $("#openWarranty").addEventListener("click", function(){ closeMenu(); openModal("#warrantyModal"); });
+  $("#openAbout").addEventListener("click", function(){ closeMenu(); openModal("#aboutModal"); });
+  $("#footWarranty").addEventListener("click", function(e){ e.preventDefault(); openModal("#warrantyModal"); });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-close]"), function(b){ b.addEventListener("click", closeModals); });
+  Array.prototype.forEach.call(document.querySelectorAll(".modal"), function(m){
+    m.addEventListener("click", function(e){ if(e.target===m) closeModals(); });
+  });
+  document.addEventListener("keydown", function(e){ if(e.key==="Escape"){ closeModals(); closeMenu(); closePop(); }});
+
+  // ---------- init ----------
+  setTheme("light");
+  render();
+})();
+</script>
+</body>
+</html>
